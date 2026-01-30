@@ -20,9 +20,8 @@
 
         h1 {
             margin-top: 30px;
-            font-size: 56px; /* أصغر */
-            color: #ff0033; /* أحمر بدون توهج */
-            text-shadow: none;
+            font-size: 56px;
+            color: #ff0033;
         }
 
         canvas {
@@ -42,55 +41,97 @@
 <canvas id="heart" width="600" height="600"></canvas>
 
 <script>
-    const canvas = document.getElementById("heart");
-    const ctx = canvas.getContext("2d");
+const canvas = document.getElementById("heart");
+const ctx = canvas.getContext("2d");
 
-    ctx.translate(300, 300);
+ctx.translate(300, 300);
 
-    function heartX(t) {
-        return 16 * Math.pow(Math.sin(t), 3);
+// معادلة القلب
+function heartX(t) {
+    return 16 * Math.pow(Math.sin(t), 3);
+}
+
+function heartY(t) {
+    return 13 * Math.cos(t)
+        - 5 * Math.cos(2 * t)
+        - 2 * Math.cos(3 * t)
+        - Math.cos(4 * t);
+}
+
+let time = 0;
+
+// متغيرات الأرنب
+let bunnyX = -120;
+let bunnyDir = 1;
+let jumpTime = 0;
+
+// رسم الأرنب
+function drawBunny(x, y) {
+    ctx.save();
+    ctx.translate(x, y);
+
+    ctx.fillStyle = "#ffb6c1";
+    ctx.shadowBlur = 0;
+
+    // الجسم
+    ctx.beginPath();
+    ctx.arc(0, 0, 18, 0, Math.PI * 2);
+    ctx.fill();
+
+    // الرأس
+    ctx.beginPath();
+    ctx.arc(0, -22, 14, 0, Math.PI * 2);
+    ctx.fill();
+
+    // الأذنين
+    ctx.beginPath();
+    ctx.ellipse(-6, -45, 4, 12, 0, 0, Math.PI * 2);
+    ctx.ellipse(6, -45, 4, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+}
+
+// رسم القلب
+function drawHeart(scale) {
+    ctx.clearRect(-300, -300, 600, 600);
+
+    ctx.fillStyle = "#ff0033";
+    ctx.shadowColor = "rgba(255, 0, 51, 0.9)";
+    ctx.shadowBlur = 20;
+
+    for (let t = 0; t <= Math.PI * 2; t += 0.008) {
+        const x = heartX(t) * scale * 1.2;
+        const y = -heartY(t) * scale;
+        ctx.fillRect(x, y, 3, 3);
     }
 
-    function heartY(t) {
-        return 13 * Math.cos(t)
-            - 5 * Math.cos(2 * t)
-            - 2 * Math.cos(3 * t)
-            - Math.cos(4 * t);
-    }
+    // حرف G
+    ctx.shadowBlur = 15;
+    ctx.font = "bold 85px MyFont";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("G", 0, 15);
 
-    let time = 0;
+    // الأرنب
+    drawBunny(bunnyX, 200 - Math.abs(Math.sin(jumpTime)) * 25);
+}
 
-    function drawHeart(scale) {
-        ctx.clearRect(-300, -300, 600, 600);
+// الحركة
+function animate() {
+    time += 0.05;
+    jumpTime += 0.08;
 
-        // القلب المتوهج
-        ctx.fillStyle = "#ff0033";
-        ctx.shadowColor = "rgba(255, 0, 51, 0.9)";
-        ctx.shadowBlur = 20;
+    const pulse = 12 + Math.sin(time) * 1.2;
 
-        for (let t = 0; t <= Math.PI * 2; t += 0.008) {
-            const x = heartX(t) * scale * 1.2;
-            const y = -heartY(t) * scale;
-            ctx.fillRect(x, y, 3, 3);
-        }
+    bunnyX += bunnyDir * 0.7;
+    if (bunnyX > 130 || bunnyX < -130) bunnyDir *= -1;
 
-        // حرف G
-        ctx.shadowBlur = 15;
-        ctx.fillStyle = "#ff0033";
-        ctx.font = "bold 85px MyFont";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("G", 0, 15);
-    }
+    drawHeart(pulse);
+    requestAnimationFrame(animate);
+}
 
-    function animate() {
-        time += 0.05;
-        const pulse = 12 + Math.sin(time) * 1.2;
-        drawHeart(pulse);
-        requestAnimationFrame(animate);
-    }
-
-    animate();
+animate();
 </script>
 
 </body>
